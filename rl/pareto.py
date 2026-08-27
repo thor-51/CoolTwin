@@ -22,7 +22,7 @@ from rl.train_ppo import train_ppo
 from evaluation.metrics import run_policy_episode
 
 
-def run_pareto_sweep(total_timesteps: int = 15_000, eval_seed: int = 42):
+def run_pareto_sweep(total_timesteps: int = 200_000, eval_seed: int = 42):
     results = {}
     for name, weights in PARETO_WEIGHT_SET.items():
         print(f"Training PPO for weighting: {name} ({weights})...")
@@ -59,7 +59,7 @@ def plot_pareto_front(results: dict, save_path: str = "results/pareto_front.png"
 
 
 if __name__ == "__main__":
-    results = run_pareto_sweep(total_timesteps=15_000)
+    results = run_pareto_sweep(total_timesteps=200_000)
     plot_pareto_front(results)
 
     print("\nSummary:")

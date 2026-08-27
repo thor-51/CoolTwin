@@ -42,15 +42,21 @@ half-built integrations.
 - **Phase 3** (RL agent) — PPO and SAC trained on the twin with a configurable
   multi-objective reward (cost/comfort/carbon/peak), evaluated against rule-based,
   PID, and random baselines; Pareto front traced across 5 reward weightings. ✅
-  Result (short training budget, 15k timesteps — see note below): **SAC beat the
-  rule-based thermostat baseline on both energy use (205 vs 210 kWh) and reward**,
-  with comparable comfort — see `notebooks/02_train_rl_agents.py` and `rl/pareto.py`.
+  Result (50k-timestep training budget): **SAC beat all three baselines on reward,
+  energy use, discomfort, and carbon** (202 kWh / 347 K·step discomfort / 91 kg CO2
+  vs. the rule-based thermostat's 211 kWh / 382 K·step / 95 kg). PPO also beat both
+  baselines on reward, trading more energy for the lowest discomfort among the RL
+  agents — see `notebooks/02_train_rl_agents.py`.
+  The Pareto sweep (200k timesteps per weighting) now shows a genuine trade-off
+  curve: energy ranges 129–248 kWh across weightings, with `comfort_focused`
+  trading roughly 2x the energy of the leanest weighting for the lowest discomfort
+  — see `rl/pareto.py` and `results/pareto_front.png`.
 
-  *Note on training budget*: the numbers above use a short (~3 min) training run so
-  the pipeline is fast to iterate on and CI-friendly. The Pareto sweep's discomfort
-  axis doesn't yet fully separate across weightings at this budget — increase
-  `total_timesteps` in `rl/pareto.py` / `notebooks/02_train_rl_agents.py` (e.g. to
-  200k+) for final results used in the report/pitch.
+  *Note on training budget*: these numbers use 50k timesteps (PPO/SAC comparison)
+  and 200k timesteps per weighting (Pareto sweep) — enough for a clear, defensible
+  signal, run on CPU in well under an hour total. Longer training (e.g. 500k+)
+  would likely sharpen the separation further and is worth doing once with more
+  compute before the final pitch numbers are locked in.
 
 See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan.
 

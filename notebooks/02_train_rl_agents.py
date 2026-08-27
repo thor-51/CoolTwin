@@ -22,7 +22,7 @@ from evaluation.baselines import RuleBasedThermostat, PIDController, RandomContr
 from evaluation.metrics import run_policy_episode
 
 
-def main(total_timesteps: int = 15_000, eval_seed: int = 123):
+def main(total_timesteps: int = 50_000, eval_seed: int = 123):
     weights = RewardWeights()  # balanced default
 
     print(f"Training PPO for {total_timesteps} timesteps...")
