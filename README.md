@@ -39,6 +39,18 @@ half-built integrations.
   against physics-only and pure-ML baselines. ✅
   Result on held-out synthetic test episodes: **hybrid RMSE 0.18°C** vs. physics-only
   0.42°C and pure-ML 0.21°C — see `notebooks/01_train_residual_lstm.py`.
+- **Phase 3** (RL agent) — PPO and SAC trained on the twin with a configurable
+  multi-objective reward (cost/comfort/carbon/peak), evaluated against rule-based,
+  PID, and random baselines; Pareto front traced across 5 reward weightings. ✅
+  Result (short training budget, 15k timesteps — see note below): **SAC beat the
+  rule-based thermostat baseline on both energy use (205 vs 210 kWh) and reward**,
+  with comparable comfort — see `notebooks/02_train_rl_agents.py` and `rl/pareto.py`.
+
+  *Note on training budget*: the numbers above use a short (~3 min) training run so
+  the pipeline is fast to iterate on and CI-friendly. The Pareto sweep's discomfort
+  axis doesn't yet fully separate across weightings at this budget — increase
+  `total_timesteps` in `rl/pareto.py` / `notebooks/02_train_rl_agents.py` (e.g. to
+  200k+) for final results used in the report/pitch.
 
 See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan.
 
@@ -55,6 +67,12 @@ python notebooks/00_baseline_random_agent.py
 
 # Train the hybrid twin's residual model and see the RMSE comparison table
 python notebooks/01_train_residual_lstm.py
+
+# Train PPO + SAC, compare against rule-based/PID/random baselines
+python notebooks/02_train_rl_agents.py
+
+# Trace the Pareto front across reward weightings (takes a few minutes)
+python rl/pareto.py
 
 # Run tests
 pytest tests/

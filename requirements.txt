@@ -8,7 +8,7 @@ gymnasium>=0.29
 # --- Phase 2: hybrid twin (residual LSTM) ---
 torch>=2.2
 
-# --- Phase 2+: RL ---
+# --- Phase 3: RL ---
 stable-baselines3>=2.3
 
 # --- Phase 4: uncertainty ---

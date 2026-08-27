@@ -26,9 +26,19 @@ import gymnasium as gym
 from gymnasium import spaces
 
 from twin.rc_model import RCThermalZone, RCParams
+from rl.reward import RewardWeights, compute_reward
 
 
 class CoolTwinEnv(gym.Env):
+    """
+    residual_model: optional trained ResidualLSTM (twin/residual_lstm.py).
+    If provided, the env corrects each step's physics prediction with the
+    learned residual (i.e. steps through the hybrid twin, per Phase 2)
+    instead of the raw RC-network-only prediction. If None (default), the
+    env behaves exactly as in Phase 1 -- physics-only -- so existing
+    baselines and tests remain unaffected.
+    """
+
     metadata = {"render_modes": []}
 
     def __init__(
@@ -37,6 +47,9 @@ class CoolTwinEnv(gym.Env):
         dt_seconds: float = 900.0,      # 15-minute control steps
         comfort_band: tuple[float, float] = (21.0, 25.0),
         hvac_max_watts: float = 2000.0,
+        reward_weights: RewardWeights | None = None,
+        residual_model=None,
+        residual_window: int = 8,
         seed: int | None = None,
     ):
         super().__init__()
@@ -45,6 +58,11 @@ class CoolTwinEnv(gym.Env):
         self.n_steps = int(episode_hours * 3600 / dt_seconds)
         self.comfort_low, self.comfort_high = comfort_band
         self.hvac_max_watts = hvac_max_watts
+        self.weights = reward_weights or RewardWeights()
+
+        self.residual_model = residual_model
+        self.residual_window = residual_window
+        self._feature_history = []  # rolling window for the residual model
 
         self.observation_space = spaces.Box(
             low=np.array([-20, -30, 15, 0, 0, 0, 0], dtype=np.float32),
@@ -83,6 +101,7 @@ class CoolTwinEnv(gym.Env):
         self.cumulative_energy_kwh = 0.0
         self.cumulative_carbon_kg = 0.0
         self.peak_power_w = 0.0
+        self._feature_history = []
 
         obs = self._get_obs()
         return obs, {}
@@ -97,6 +116,35 @@ class CoolTwinEnv(gym.Env):
             [self.T_in, T_out, 23.0, occ, price, hour, progress], dtype=np.float32
         )
 
+    def _apply_residual_correction(self, T_out, Q_hvac, Q_gain, T_in_physics) -> float:
+        """Uses the trained ResidualLSTM to correct the physics prediction,
+        matching the feature construction in twin/residual_lstm.py. Falls
+        back to the raw physics prediction until enough history has
+        accumulated to fill a full window."""
+        import torch
+
+        hour = (self.t * self.dt_seconds / 3600.0) % 24
+        feat = np.array(
+            [
+                T_out,
+                np.sin(hour / 24 * 2 * np.pi),
+                np.cos(hour / 24 * 2 * np.pi),
+                Q_hvac / 1500.0,
+                Q_gain / 400.0,
+                T_in_physics,
+            ],
+            dtype=np.float32,
+        )
+        self._feature_history.append(feat)
+        if len(self._feature_history) < self.residual_window:
+            return T_in_physics
+
+        window = np.stack(self._feature_history[-self.residual_window :])
+        with torch.no_grad():
+            x = torch.from_numpy(window).unsqueeze(0)
+            residual = self.residual_model(x).item()
+        return T_in_physics + residual
+
     def step(self, action: np.ndarray):
         action = float(np.clip(action[0], -1.0, 1.0))
         Q_hvac = action * self.hvac_max_watts
@@ -106,9 +154,15 @@ class CoolTwinEnv(gym.Env):
         Q_gain = 300.0 if occ else 50.0
         price = self._price(self.t)
 
-        self.T_wall, self.T_in = self.zone.step(
+        T_wall_new, T_in_physics = self.zone.step(
             self.T_wall, self.T_in, T_out, Q_hvac, Q_gain, self.dt_seconds
         )
+        self.T_wall = T_wall_new
+
+        if self.residual_model is not None:
+            self.T_in = self._apply_residual_correction(T_out, Q_hvac, Q_gain, T_in_physics)
+        else:
+            self.T_in = T_in_physics
 
         # --- energy / cost ---
         power_w = abs(Q_hvac)
@@ -130,11 +184,11 @@ class CoolTwinEnv(gym.Env):
         else:
             discomfort = 0.0
 
-        # --- multi-term reward (default equal-ish weights; see rl/reward.py for
-        #     the configurable Pareto-front version used from Phase 3 onward) ---
-        w_cost, w_comfort, w_carbon, w_peak = 1.0, 2.0, 0.5, 0.1
-        peak_penalty = w_peak * (power_w / self.hvac_max_watts)
-        reward = -(w_cost * cost + w_comfort * discomfort + w_carbon * carbon_kg + peak_penalty)
+        # --- multi-term reward (configurable weights, see rl/reward.py --
+        #     Phase 3 trains multiple policies across weightings to trace a
+        #     Pareto front rather than using one fixed weighted sum) ---
+        peak_frac = power_w / self.hvac_max_watts
+        reward = compute_reward(cost, discomfort, carbon_kg, peak_frac, self.weights)
 
         self.t += 1
         terminated = False
