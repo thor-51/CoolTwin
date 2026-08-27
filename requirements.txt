@@ -5,9 +5,11 @@ pandas>=2.1
 matplotlib>=3.8
 gymnasium>=0.29
 
+# --- Phase 2: hybrid twin (residual LSTM) ---
+torch>=2.2
+
 # --- Phase 2+: RL ---
 stable-baselines3>=2.3
-torch>=2.2
 
 # --- Phase 4: uncertainty ---
 scikit-learn>=1.4

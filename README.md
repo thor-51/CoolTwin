@@ -34,7 +34,12 @@ half-built integrations.
 
 ## Status
 
-Phase 1 (foundations) — repo scaffolding, baseline environment, first RC thermal model.
+- **Phase 1** (foundations) — repo scaffolding, baseline environment, RC thermal model. ✅
+- **Phase 2** (hybrid twin) — residual LSTM correction model, trained and evaluated
+  against physics-only and pure-ML baselines. ✅
+  Result on held-out synthetic test episodes: **hybrid RMSE 0.18°C** vs. physics-only
+  0.42°C and pure-ML 0.21°C — see `notebooks/01_train_residual_lstm.py`.
+
 See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan.
 
 ## Quickstart
@@ -47,6 +52,9 @@ pip install -r requirements.txt
 
 # Run the baseline: random-action agent on the RC-network zone
 python notebooks/00_baseline_random_agent.py
+
+# Train the hybrid twin's residual model and see the RMSE comparison table
+python notebooks/01_train_residual_lstm.py
 
 # Run tests
 pytest tests/
