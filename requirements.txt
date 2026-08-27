@@ -1,0 +1,29 @@
+# --- Phase 1: core / twin ---
+numpy>=1.26
+scipy>=1.11
+pandas>=2.1
+matplotlib>=3.8
+gymnasium>=0.29
+
+# --- Phase 2+: RL ---
+stable-baselines3>=2.3
+torch>=2.2
+
+# --- Phase 4: uncertainty ---
+scikit-learn>=1.4
+
+# --- Phase 5: explainability ---
+shap>=0.45
+
+# --- Phase 7: dashboard ---
+streamlit>=1.33
+plotly>=5.20
+
+# --- Phase 2+ (optional, install later): high-fidelity simulation ---
+# sinergym>=3.5      # requires EnergyPlus system install, see docs/sinergym_setup.md
+
+# --- dev tooling ---
+pytest>=8.0
+pre-commit>=3.6
+black>=24.0
+ruff>=0.4
