@@ -118,23 +118,15 @@ class CoolTwinEnv(gym.Env):
 
     def _apply_residual_correction(self, T_out, Q_hvac, Q_gain, T_in_physics) -> float:
         """Uses the trained ResidualLSTM to correct the physics prediction,
-        matching the feature construction in twin/residual_lstm.py. Falls
-        back to the raw physics prediction until enough history has
-        accumulated to fill a full window."""
+        via the shared feature-construction helper (twin/residual_lstm.py)
+        so online (here) and offline (dataset-based) feature vectors never
+        drift apart. Falls back to the raw physics prediction until enough
+        history has accumulated to fill a full window."""
         import torch
+        from twin.residual_lstm import build_feature_vector
 
         hour = (self.t * self.dt_seconds / 3600.0) % 24
-        feat = np.array(
-            [
-                T_out,
-                np.sin(hour / 24 * 2 * np.pi),
-                np.cos(hour / 24 * 2 * np.pi),
-                Q_hvac / 1500.0,
-                Q_gain / 400.0,
-                T_in_physics,
-            ],
-            dtype=np.float32,
-        )
+        feat = build_feature_vector(T_out, hour, Q_hvac, Q_gain, T_in_physics)
         self._feature_history.append(feat)
         if len(self._feature_history) < self.residual_window:
             return T_in_physics
@@ -200,7 +192,10 @@ class CoolTwinEnv(gym.Env):
             "carbon_kg": carbon_kg,
             "discomfort": discomfort,
             "T_in": self.T_in,
+            "T_in_physics": T_in_physics,
             "T_out": T_out,
+            "Q_hvac": Q_hvac,
+            "Q_gain": Q_gain,
         }
 
         return self._get_obs(), reward, terminated, truncated, info

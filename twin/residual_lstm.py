@@ -30,6 +30,24 @@ from torch.utils.data import Dataset, DataLoader
 FEATURE_NAMES = ["T_out", "hour_sin", "hour_cos", "Q_hvac_norm", "Q_gain_norm", "T_in_physics"]
 
 
+def build_feature_vector(T_out: float, hour: float, Q_hvac: float, Q_gain: float, T_in_physics: float) -> np.ndarray:
+    """Single-step feature construction, shared by offline dataset building
+    (_build_features, below) and online use in twin/env.py and the
+    uncertainty modules -- keeping these in one place avoids the two
+    diverging silently."""
+    return np.array(
+        [
+            T_out,
+            np.sin(hour / 24 * 2 * np.pi),
+            np.cos(hour / 24 * 2 * np.pi),
+            Q_hvac / 1500.0,
+            Q_gain / 400.0,
+            T_in_physics,
+        ],
+        dtype=np.float32,
+    )
+
+
 def _build_features(ep: dict) -> np.ndarray:
     hour = ep["hour"]
     feats = np.stack(
