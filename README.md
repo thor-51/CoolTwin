@@ -76,6 +76,18 @@ half-built integrations.
   `explainability/llm_explainer.py`; without it, a grounded template-based
   explanation is used automatically (same underlying numbers either way) — see
   `notebooks/04_explainability.py`.
+- **Phase 6** (evaluation) — the definitive comparison table for the report/pitch:
+  all controllers (random, rule-based, PID, single-objective PPO, multi-objective
+  PPO, multi-objective SAC) evaluated on the same held-out episode, with comfort
+  reported in actual °C-hours, peak demand % change vs. rule-based, and per-decision
+  inference latency. ✅ See `results/final_evaluation_table.md`.
+
+  **Key finding**: the single-objective (cost-only) PPO policy uses 84% less peak
+  power and 92% less energy than the rule-based baseline — but at **~2.7x worse
+  comfort violation** (255.7°C-hr vs. 86–95°C-hr for the multi-objective policies).
+  This is the empirical demonstration of exactly the trade-off problem described in
+  the abstract's problem statement: single-objective controllers sacrifice comfort
+  for cost. See `notebooks/05_final_evaluation.py`.
 
 See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan.
 
@@ -104,6 +116,9 @@ python notebooks/03_uncertainty_quantification.py
 
 # Reward decomposition, SHAP attribution, LLM/template explanations, Q&A demo
 python notebooks/04_explainability.py
+
+# Final comparison table across all controllers (the headline report table)
+python notebooks/05_final_evaluation.py
 
 # Run tests
 pytest tests/

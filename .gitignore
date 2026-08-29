@@ -9,11 +9,13 @@ venv/
 # Jupyter
 .ipynb_checkpoints/
 
-# Data / results (keep folder structure and key plots, ignore trained model
-# binaries and generated logs -- those are large and easy to regenerate)
+# Data / results (keep folder structure and key plots/tables, ignore
+# trained model binaries and generated logs -- those are large and easy to
+# regenerate)
 results/*
 !results/.gitkeep
 !results/*.png
+!results/*.md
 results/*.zip
 data/
 *.csv
