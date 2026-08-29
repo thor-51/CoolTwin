@@ -88,6 +88,16 @@ half-built integrations.
   This is the empirical demonstration of exactly the trade-off problem described in
   the abstract's problem statement: single-objective controllers sacrifice comfort
   for cost. See `notebooks/05_final_evaluation.py`.
+- **Phase 7** (dashboard) — an interactive Streamlit dashboard (`dashboard/app.py`)
+  tying every phase together: live twin fidelity (physics vs hybrid vs ground truth),
+  the RL policy's decisions + reward decomposition over an episode, predictive
+  uncertainty + safety-layer fallback events, a fast Pareto-front preview, and the
+  natural-language Q&A layer (LLM or template). ✅
+  All training in the dashboard uses a short, interactive-speed budget — clearly
+  labeled in the UI as demo-quality, not the final report numbers (those come from
+  the longer offline runs in `notebooks/02`, `03`, and `05`). Verified end-to-end
+  with Streamlit's official `AppTest` framework (renders, chat Q&A, and the Pareto
+  preview button all confirmed exception-free) — see `tests/test_dashboard.py`.
 
 See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan.
 
@@ -119,6 +129,9 @@ python notebooks/04_explainability.py
 
 # Final comparison table across all controllers (the headline report table)
 python notebooks/05_final_evaluation.py
+
+# Launch the interactive dashboard
+streamlit run dashboard/app.py
 
 # Run tests
 pytest tests/
