@@ -151,7 +151,9 @@ was built the way it was.
   with Streamlit's official `AppTest` framework (renders, chat Q&A, and the Pareto
   preview button all confirmed exception-free) — see `tests/test_dashboard.py`.
 
-See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan.
+See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan, and
+[`docs/pitch_prep.md`](docs/pitch_prep.md) for the pitch story arc, key numbers,
+and prepared answers for the hard questions.
 
 ## Quickstart
 
