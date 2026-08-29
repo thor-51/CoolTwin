@@ -16,6 +16,8 @@ scikit-learn>=1.4
 
 # --- Phase 5: explainability ---
 shap>=0.45
+anthropic>=0.40   # optional: only needed for the LLM explanation layer;
+                  # falls back to a template-based explainer if unset
 
 # --- Phase 7: dashboard ---
 streamlit>=1.33

@@ -64,6 +64,18 @@ half-built integrations.
   Dropout's 1.3x) and was selected for the safety layer on that basis. The fallback
   triggered on 21% of steps in-distribution vs. 59% during the heatwave shock —
   see `notebooks/03_uncertainty_quantification.py`.
+- **Phase 5** (explainability) — reward decomposition, SHAP feature attribution
+  (both the residual model and the RL policy), and an LLM explanation layer with
+  a deterministic template fallback (so it works offline / in CI without an API
+  key) plus a small canned Q&A router. ✅
+  See `results/reward_decomposition.png` for a 2-day evaluation episode — comfort
+  penalty clearly dominates during two daytime heat peaks while other terms stay
+  low, a genuinely interpretable pattern. SHAP correctly attributes the twin's
+  correction at the worst-comfort step to `T_in_physics` and `T_out` from the most
+  recent timesteps. Set `ANTHROPIC_API_KEY` to use the real LLM in
+  `explainability/llm_explainer.py`; without it, a grounded template-based
+  explanation is used automatically (same underlying numbers either way) — see
+  `notebooks/04_explainability.py`.
 
 See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan.
 
@@ -90,8 +102,17 @@ python rl/pareto.py
 # Train MC Dropout + Deep Ensemble, calibrate, demo the safety layer
 python notebooks/03_uncertainty_quantification.py
 
+# Reward decomposition, SHAP attribution, LLM/template explanations, Q&A demo
+python notebooks/04_explainability.py
+
 # Run tests
 pytest tests/
+```
+
+For the LLM explanation layer, set your Anthropic API key first (optional --
+falls back to a template-based explainer automatically if unset):
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 Sinergym / EnergyPlus is used later (Phase 2+) for higher-fidelity simulation and is
