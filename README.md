@@ -32,6 +32,58 @@ prototype. Those are documented as deliberate future work in
 built *properly*, evaluated honestly, and explainable end-to-end — not a long list of
 half-built integrations.
 
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Inputs
+        W[Weather signal]
+        O[Occupancy signal]
+        P[Electricity price signal]
+    end
+
+    subgraph Twin["Hybrid Digital Twin"]
+        RC[RC Thermal Network<br/>physics model]
+        LSTM[Residual LSTM<br/>learned correction]
+        RC --> H[Hybrid prediction]
+        LSTM --> H
+    end
+
+    subgraph Agent["RL Agent"]
+        ENV[CoolTwinEnv<br/>Gymnasium wrapper]
+        REW[Multi-term Reward<br/>cost / comfort / carbon / peak]
+        PPO[PPO]
+        SAC[SAC]
+        ENV --> REW
+        REW --> PPO
+        REW --> SAC
+    end
+
+    subgraph Trust["Uncertainty + Explainability"]
+        UQ[MC Dropout / Deep Ensembles]
+        CAL[Calibration]
+        SAFE[Uncertainty-gated fallback<br/>to rule-based control]
+        DECOMP[Reward decomposition]
+        SHAPX[SHAP attribution]
+        LLM[LLM Explanation Layer]
+    end
+
+    Inputs --> Twin
+    Twin --> ENV
+    H --> UQ --> CAL --> SAFE
+    Agent --> DECOMP --> LLM
+    UQ --> LLM
+    SHAPX --> LLM
+
+    LLM --> DASH[Streamlit Dashboard]
+    SAFE --> DASH
+    Agent --> DASH
+```
+
+See [`docs/architecture.md`](docs/architecture.md) for the component-by-component
+notes, and [`docs/methodology.md`](docs/methodology.md) for how and why each phase
+was built the way it was.
+
 ## Status
 
 - **Phase 1** (foundations) — repo scaffolding, baseline environment, RC thermal model. ✅
