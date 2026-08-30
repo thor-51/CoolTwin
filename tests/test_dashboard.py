@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import torch
 
@@ -92,3 +94,45 @@ def test_streamlit_app_chat_tab_answers_a_question():
     assert not at.exception
     chat_tab = at.tabs[4]
     assert len(chat_tab.markdown) >= 2  # Q: ... and A: ... lines
+
+
+def test_dashboard_imports_work_without_pythonpath_set():
+    """Regression test for a real deploy bug: `streamlit run dashboard/app.py`
+    only puts dashboard/ on sys.path, not the repo root, so the top-level
+    package imports (rl, twin, explainability) failed with ModuleNotFoundError
+    on Streamlit Community Cloud even though `pytest tests/` passed locally --
+    pytest's own invocation (PYTHONPATH=. pytest tests/ -q, see
+    .github/workflows/ci.yml) was silently masking it.
+
+    Runs app.py in a clean subprocess with PYTHONPATH deliberately unset and
+    the working directory set to dashboard/ itself, the closest reproduction
+    of Streamlit's actual invocation available without a real Streamlit
+    server. dashboard/app.py's own sys.path.insert() fix (see its top-of-file
+    comment) is what should make this pass.
+    """
+    import pathlib
+    import subprocess
+    import sys
+
+    repo_root = pathlib.Path(__file__).parent.parent
+    dashboard_dir = repo_root / "dashboard"
+
+    env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import runpy; runpy.run_path('app.py', run_name='__not_main__')",
+        ],
+        cwd=str(dashboard_dir),
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
+    assert "ModuleNotFoundError" not in result.stderr, (
+        f"Dashboard import failed outside of pytest's PYTHONPATH -- this is "
+        f"exactly the Streamlit Cloud deploy failure mode.\n{result.stderr}"
+    )

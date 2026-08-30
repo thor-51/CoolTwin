@@ -27,6 +27,15 @@ every UI interaction.
 from __future__ import annotations
 
 import os
+import sys
+
+# Streamlit runs this script directly, which puts only this file's directory
+# (dashboard/) on sys.path -- not the repo root. That breaks the top-level
+# package imports below (rl, explainability, twin, evaluation) unless the
+# app happens to be launched with PYTHONPATH already set to the repo root.
+# Add it explicitly so `streamlit run dashboard/app.py` works the same way
+# locally, on Streamlit Community Cloud, or from any other working directory.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
