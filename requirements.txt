@@ -24,7 +24,7 @@ streamlit>=1.33
 plotly>=5.20
 
 # --- Phase 2+ (optional, install later): high-fidelity simulation ---
-# sinergym>=3.5      # requires EnergyPlus system install, see docs/sinergym_setup.md
+sinergym>=3.0      # optional: requires a local EnergyPlus install, see docs/sinergym_setup.md
 
 # --- dev tooling ---
 pytest>=8.0

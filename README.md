@@ -87,6 +87,17 @@ was built the way it was.
 ## Status
 
 - **Phase 1** (foundations) — repo scaffolding, baseline environment, RC thermal model. ✅
+  The custom RC-network environment (`twin/env.py`) is the default for everything else
+  in this repo — no EnergyPlus install required. Sinergym/EnergyPlus is now also wired
+  in and verified working as an optional, higher-fidelity path (see
+  `notebooks/00b_sinergym_baseline.py` for a real EnergyPlus-backed random-action run,
+  and `docs/sinergym_setup.md` for setup — there's one non-obvious env var gotcha
+  documented there). A first-pass validation of the 3R2C physics model against a real
+  EnergyPlus trajectory (`notebooks/06_sinergym_validation.py`) found a genuinely bad
+  fit (~11°C RMSE) — diagnosed, not hidden: the ground-truth signal used is itself the
+  output of EnergyPlus's own closed control loop, not an independent forcing input.
+  See `results/sinergym_validation.md` for the full diagnosis and the concrete next
+  step to fix it.
 - **Phase 2** (hybrid twin) — residual LSTM correction model, trained and evaluated
   against physics-only and pure-ML baselines. ✅
   Result on held-out synthetic test episodes: **hybrid RMSE 0.18°C** vs. physics-only
@@ -197,9 +208,17 @@ falls back to a template-based explainer automatically if unset):
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Sinergym / EnergyPlus is used later (Phase 2+) for higher-fidelity simulation and is
-**not required** to run the Phase 1 baseline above — see
-[`docs/sinergym_setup.md`](docs/sinergym_setup.md) for installing it when you're ready.
+Sinergym / EnergyPlus is optional and gives a higher-fidelity, real EnergyPlus-backed
+alternative to the RC-network environment above — **not required** for anything else
+in this repo. See [`docs/sinergym_setup.md`](docs/sinergym_setup.md) for setup, then:
+```bash
+# Random-action sanity check on a real EnergyPlus scenario
+python notebooks/00b_sinergym_baseline.py
+
+# Fit the 3R2C model against a real EnergyPlus trajectory (see the honest
+# result and diagnosis in results/sinergym_validation.md)
+python notebooks/06_sinergym_validation.py
+```
 
 ## Repo structure
 

@@ -37,6 +37,9 @@ mlruns/
 .vscode/
 .idea/
 
-# EnergyPlus / Sinergym artifacts
-Eplus-env-*/
+# EnergyPlus / Sinergym artifacts (runtime working dirs, named after the
+# env ID + a run counter, e.g. Eplus-5zone-hot-continuous-v1-res1/)
+Eplus-*-res*/
+demo-v1-res*/
 *.epw.bak
+.lock
