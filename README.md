@@ -6,7 +6,7 @@ using Hybrid AI, Reinforcement Learning, and Multi-Objective Optimization.
 
 Built for the Schneider Electric Co-Creation Challenge 2026.
 
-Team: Aryan Vatsal, Anmol Tibrewal, Josithaa Joseph — Vellore Institute of Technology
+Team: Josithaa Joseph, Anmol Tibrewal, Aryan Vatsal — Vellore Institute of Technology
 Guide: Dr. Athira K
 
 ---
