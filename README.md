@@ -1,4 +1,5 @@
 # CoolTwin
+![CI](https://github.com/thor-51/CoolTwin/actions/workflows/ci.yml/badge.svg)
 
 **An Explainable, Uncertainty-Aware Digital Twin Framework for Autonomous HVAC Scheduling**
 using Hybrid AI, Reinforcement Learning, and Multi-Objective Optimization.
