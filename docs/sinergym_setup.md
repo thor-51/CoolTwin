@@ -33,8 +33,15 @@ own machine or in CI.
 
 2. Install Sinergym:
    ```bash
-   pip install sinergym
+   pip install -r requirements-sinergym.txt
    ```
+   This is deliberately **not** part of the main `requirements.txt` and is
+   **not installed in CI** — Sinergym's PyPI package depends on `opyplus` via
+   a git URL, which most CI package resolvers (including GitHub Actions'
+   default pip setup) reject with `Packages installed from PyPI cannot
+   depend on packages which are not also hosted on PyPI`. Installing it
+   directly on your own machine works fine; see
+   `requirements-sinergym.txt` for the full explanation.
 
 3. **Set two environment variables before importing sinergym** — this is the
    part that isn't obvious from Sinergym's own docs and will silently fail

@@ -24,7 +24,10 @@ streamlit>=1.33
 plotly>=5.20
 
 # --- Phase 2+ (optional, install later): high-fidelity simulation ---
-sinergym>=3.0      # optional: requires a local EnergyPlus install, see docs/sinergym_setup.md
+# Sinergym (EnergyPlus-backed, optional) is intentionally NOT in this file --
+# see requirements-sinergym.txt and docs/sinergym_setup.md. Installing it here
+# would break `pip install -r requirements.txt` in CI: Sinergym's PyPI package
+# depends on `opyplus` via a git URL, which most CI package resolvers reject.
 
 # --- dev tooling ---
 pytest>=8.0

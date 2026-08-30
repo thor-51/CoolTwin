@@ -1,0 +1,15 @@
+# Optional: Sinergym (EnergyPlus-backed higher-fidelity environment).
+# NOT part of requirements.txt and NOT installed in CI -- see docs/sinergym_setup.md
+# for why, and for the EnergyPlus system install this also requires.
+#
+# Install with:
+#   pip install -r requirements-sinergym.txt
+#
+# Sinergym's PyPI package pulls in `opyplus` via a git URL
+# (git+https://github.com/AlejandroCN7/opyplus.git), which most CI package
+# resolvers reject outright ("Packages installed from PyPI cannot depend on
+# packages which are not also hosted on PyPI"). Installing directly from
+# PyPI on a normal developer machine works fine; it's specifically
+# restrictive CI/proxy resolvers that reject it -- another reason this stays
+# out of the main requirements.txt and off of CI.
+sinergym>=3.0
