@@ -38,9 +38,8 @@ half-built integrations.
 ```mermaid
 flowchart TB
     subgraph Inputs
-        W[Weather signal]
-        O[Occupancy signal]
-        P[Electricity price signal]
+        direction LR
+        W[Weather signal] ~~~ O[Occupancy signal] ~~~ P[Electricity price signal]
     end
 
     subgraph Twin["Hybrid Digital Twin"]
@@ -162,6 +161,27 @@ was built the way it was.
   the longer offline runs in `notebooks/02`, `03`, and `05`). Verified end-to-end
   with Streamlit's official `AppTest` framework (renders, chat Q&A, and the Pareto
   preview button all confirmed exception-free) — see `tests/test_dashboard.py`.
+- **Phase 8** (repo & documentation) — comprehensive methodology documentation
+  (`docs/methodology.md`), architecture diagrams (`docs/architecture.md`), and deliberate
+  future work scope documentation (`docs/future_work.md`). ✅
+- **Phase 9** (pitch prep) — pitch story arc, key numbers to memorize, prepared answers
+  for hard technical questions, and live demo script (`docs/pitch_prep.md`). ✅
+- **Phase 10** (Sinergym integration) — full pipeline replacing synthetic data with
+  real EnergyPlus building physics. ✅
+  A new data collection module (`twin/sinergym_data.py`) collects episodes from
+  Sinergym environments and produces episode dicts in the exact same format as
+  `twin/data_gen.py`, so the entire downstream pipeline (RC fitting, LSTM training,
+  RL, uncertainty, explainability) works on real building data with zero code changes.
+  The integration pipeline (`notebooks/07_sinergym_integration.py`) runs end-to-end:
+  collect EnergyPlus episodes → fit RC parameters to real data → recompute physics
+  predictions with fitted model → train residual LSTM on real errors → evaluate
+  physics-only vs hybrid vs pure-ML on held-out real episodes. Collected episodes
+  are cached to `data/sinergym_episodes.npz` to avoid re-running EnergyPlus.
+  Result on held-out real EnergyPlus test episodes: **hybrid RMSE 2.08°C** vs. physics-only
+  9.57°C (**78.2% reduction in error**), and pure-ML 1.13°C.
+  See `results/sinergym_integration.md` for full results and
+  `docs/sinergym_setup.md` for setup instructions. Requires Sinergym + EnergyPlus
+  (optional — everything else in this repo still runs without it).
 
 See [`docs/roadmap.md`](docs/roadmap.md) for the full build plan, and
 [`docs/pitch_prep.md`](docs/pitch_prep.md) for the pitch story arc, key numbers,
@@ -216,9 +236,12 @@ in this repo. See [`docs/sinergym_setup.md`](docs/sinergym_setup.md) for setup, 
 # Random-action sanity check on a real EnergyPlus scenario
 python notebooks/00b_sinergym_baseline.py
 
-# Fit the 3R2C model against a real EnergyPlus trajectory (see the honest
-# result and diagnosis in results/sinergym_validation.md)
+# First-pass validation (see results/sinergym_validation.md for diagnosis)
 python notebooks/06_sinergym_validation.py
+
+# Full Sinergym integration: collect → fit RC → train LSTM → evaluate
+# This is the main pipeline that trains the hybrid twin on real building data
+python notebooks/07_sinergym_integration.py
 ```
 
 ## Repo structure
@@ -226,13 +249,20 @@ python notebooks/06_sinergym_validation.py
 ```
 CoolTwin/
 ├── twin/              # physics model, residual ML model, hybrid twin, gym env
+│   ├── rc_model.py        # 3R2C thermal network (physics backbone)
+│   ├── residual_lstm.py   # learned residual correction (ML layer)
+│   ├── hybrid_twin.py     # combined physics + ML prediction
+│   ├── data_gen.py        # synthetic episode generator
+│   ├── sinergym_data.py   # Sinergym/EnergyPlus episode collector
+│   └── env.py             # Gymnasium environment wrapper
 ├── rl/                # RL training (PPO/SAC), reward function, Pareto front
 ├── uncertainty/        # MC Dropout, ensembles, calibration
 ├── explainability/     # reward decomposition, SHAP, LLM explanation layer
 ├── dashboard/           # Streamlit app
 ├── evaluation/          # baselines, metrics
-├── notebooks/           # exploratory scripts/notebooks
+├── notebooks/           # exploratory scripts/notebooks (00–07)
 ├── results/             # generated plots, tables (gitignored except .gitkeep)
+├── data/                  # cached Sinergym episodes (gitignored)
 ├── docs/                 # architecture, roadmap, methodology, future work
 └── tests/                 # unit tests
 ```

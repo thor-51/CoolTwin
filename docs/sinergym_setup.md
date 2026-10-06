@@ -92,3 +92,23 @@ Full writeup, including the concrete fix (use a real thermal-rate output
 variable instead of a closed-loop-derived one), is in
 `results/sinergym_validation.md`.
 
+## Full Sinergym integration (Phase 10)
+
+`notebooks/07_sinergym_integration.py` is the full pipeline that closes the
+loop identified in the first validation pass:
+
+1. **Collect** multiple episodes from Sinergym (`twin/sinergym_data.py`)
+2. **Fit** the 3R2C model parameters to the real EnergyPlus trajectory
+3. **Recompute** physics predictions with the fitted model (so the LSTM
+   learns to correct the *fitted* model's errors, not parameter mismatch)
+4. **Train** the residual LSTM on real data (same architecture, real errors)
+5. **Evaluate** physics-only vs hybrid vs pure-ML on held-out real data
+
+The data collection module (`twin/sinergym_data.py`) produces episode dicts
+in the same format as `twin/data_gen.py`, so the entire downstream pipeline
+works without code changes. Collected episodes are cached to
+`data/sinergym_episodes.npz` so EnergyPlus doesn't need to re-run each time.
+
+Results are saved to `results/sinergym_integration.md` and
+`results/sinergym_integration.png`.
+

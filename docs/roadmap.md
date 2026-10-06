@@ -166,6 +166,15 @@ Put the "impressive but unbuilt" ideas from the mega-prompt (knowledge graph, mu
 
 ---
 
+## Phase 10 — Sinergym Integration (EnergyPlus Physics)
+
+1. **EnergyPlus episode collection**: run Sinergym environments (`twin/sinergym_data.py`) across diverse comfort setpoint regimes, producing standard episode dictionaries compatible with the entire downstream pipeline and cached to `data/sinergym_episodes.npz`.
+2. **Physics parameter estimation on real data**: fit 3R2C ODE parameters directly to real EnergyPlus building dynamics (`fit_rc_params`), adapting the physics backbone before residual learning.
+3. **Residual LSTM on real building errors**: train the residual correction layer to learn the systematic gap between the fitted 3R2C model and EnergyPlus's multi-zone thermal solver.
+4. **Held-out real evaluation**: validate physics-only vs. hybrid vs. pure-ML on held-out real EnergyPlus trajectories (`notebooks/07_sinergym_integration.py`), verifying the 78.2% error reduction on real building physics.
+
+---
+
 ## What to explicitly cut (put in future_work.md, don't build)
 
 - Kubernetes/Kafka/full microservices mesh — a monolith + Streamlit is fine for a prototype
@@ -189,6 +198,7 @@ Put the "impressive but unbuilt" ideas from the mega-prompt (knowledge graph, mu
 | 6–8 | Reward decomposition, SHAP, LLM explanation layer |
 | 8–9 | Full baseline comparison table, final metrics |
 | 8–10 | Dashboard, GitHub polish, docs, demo video |
+| 10–11 | Sinergym integration: real EnergyPlus physics validation |
 | Final week | Pitch deck, rehearsal |
 
 Tell me your actual deadline and I can convert this into exact dated milestones, or we can start right now on Phase 1 — I can help you scaffold the repo, write the RC thermal model, or set up the Sinergym environment first.

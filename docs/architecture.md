@@ -1,13 +1,12 @@
 # CoolTwin — Architecture
 
-## System overview (current scope, Phase 1–7)
+## System overview (current scope, Phase 1–10)
 
 ```mermaid
 flowchart TB
     subgraph Inputs
-        W[Weather signal]
-        O[Occupancy signal]
-        P[Electricity price signal]
+        direction LR
+        W[Weather signal] ~~~ O[Occupancy signal] ~~~ P[Electricity price signal]
     end
 
     subgraph Twin["Hybrid Digital Twin"]

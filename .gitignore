@@ -43,3 +43,6 @@ Eplus-*-res*/
 demo-v1-res*/
 *.epw.bak
 .lock
+
+# Temp working folder
+jo-temp/
